@@ -1,38 +1,31 @@
-# CSSwitch for Claude Science Linux
+# CSSwitch Linux Proxy
 
-Target: x86-64 Ubuntu/Debian + glibc.
+MacAir 上的 Claude Science 代理 + hostfix 转发。
 
-## Install
+## 组件
+
+| 文件 | 说明 |
+|---|---|
+| `proxy/csswitch_proxy.py` | Ark/DeepSeek/Qwen 多 provider 代理 |
+| `proxy/hostfix_proxy_v9.py` | 8990→8992 转发，自动 cookie 注入 |
+| `config/start.sh` | 一键启动脚本 |
+| `config/config.env` | 配置模板 |
+
+## 模型支持
+
+- DeepSeek V4 Pro / V4 Flash
+- GLM 5.2（火山方舟 coding-plan）
+- Qwen Max / Plus / Turbo
+
+## 端口
+
+- 8990: hostfix proxy（外网访问）
+- 8992: Claude Science daemon
+- 18991: Ark 代理（Anthropic API 兼容）
+
+## 启动
 
 ```bash
-cd ~/csswitch-science-linux
-mkdir -p bin proxy scripts
-curl -L https://downloads.claude.ai/claude-science/latest/linux-x64 -o bin/claude-science
-chmod +x bin/claude-science
-python3 -c 'import cryptography' || pip3 install cryptography
+cd ~/csswitch
+zsh config/start.sh
 ```
-
-Edit `config.env`:
-
-```bash
-ARK_API_KEY=...
-BIND_HOST=127.0.0.1      # or 0.0.0.0 for Tailscale/LAN
-PUBLIC_HOST=127.0.0.1    # or your Tailscale IP
-```
-
-## Run
-
-```bash
-./start.sh
-./status.sh --url
-./stop.sh
-```
-
-Open the URL printed by `status.sh --url`, then click **Sign in** once. The link expires in ~3 min and is single-use.
-
-## Notes
-
-- Proxy listens on `127.0.0.1:$PROXY_PORT` only; Science reaches it locally.
-- Science UI bind is controlled by `BIND_HOST`.
-- `--allow-origin` is set to `http://$PUBLIC_HOST:$SCIENCE_PORT`.
-- Remote Anthropic MCP services are expected to fail/skip under virtual login; local Science tools still work.
